@@ -1,7 +1,10 @@
-SAMY NAILS TURNOS - V1
+SAMY NAILS TURNOS V4 - CORRECCIÓN DE ADMINISTRACIÓN
 
-Abrí index.html para probarla.
+Esta versión corrige el acceso a ADMINISTRACIÓN.
+Clave inicial: 1234
 
-Código de administración de la demo: 2468
+También usa una clave de almacenamiento nueva para no mezclar la configuración guardada por la versión V4 anterior.
 
-IMPORTANTE: esta V1 funciona localmente en el dispositivo y guarda los datos en el navegador (localStorage). Sirve para probar el flujo completo. Para que una clienta reserve desde su teléfono y Samy Nails vea ese turno desde otro teléfono, hay que conectar una base de datos/servidor en la siguiente etapa.
+Si alguna vez la clave queda modificada, dentro de Administración aparece RESTABLECER A 1234.
+
+PRÓXIMO PASO: conectar esta versión a Supabase para que los turnos sean realmente online.
