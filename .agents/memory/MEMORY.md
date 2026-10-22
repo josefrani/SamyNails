@@ -1,0 +1,1 @@
+- [Alcance de la integración](supabase-scope.md) — conservar Samy Nails y su diseño; integrar el Supabase existente sin reconstruir.
