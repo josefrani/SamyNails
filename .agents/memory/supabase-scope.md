@@ -7,6 +7,8 @@ Continuar el proyecto existente Samy Nails sin reconstruirlo desde cero ni cambi
 
 El usuario confirmó que la URL y la clave pública funcionan, y confirmó los nombres de columnas de `services`, `availability_slots`, `bookings`, `settings` y `service_parallel`. No volver a pedir ni repetir esas verificaciones.
 
+El usuario confirmó que los horarios aparecen al recargar la vista previa y elegir un servicio y una fecha con disponibilidad.
+
 **Why:** el usuario pidió estas restricciones expresamente.
 
-**How to apply:** adaptar la integración al esquema existente y conservar el comportamiento de la aplicación; no sustituir la base, rediseñar la interfaz ni pedir de nuevo los datos de conexión/esquema confirmados.
+**How to apply:** adaptar la integración al esquema existente y conservar el comportamiento de la aplicación; no sustituir la base, rediseñar la interfaz ni pedir de nuevo los datos de conexión/esquema confirmados. Para depurar horarios, comparar el servicio activo y la fecha elegida, usando una recarga reciente.
