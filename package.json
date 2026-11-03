@@ -1,10 +1,9 @@
-
 {
   "name": "samy-nails",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node Server.js"
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=20"
