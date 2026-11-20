@@ -30,21 +30,33 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (pathname === "/supabase-config.js") {
-    const url = process.env.SUPABASE_URL;
-    const anonKey = process.env.SUPABASE_ANON_KEY;
-    if (!url || !anonKey) {
+  if (pathname === "/supabase-config.js" || pathname === "/push-config.js") {
+    const config = pathname === "/supabase-config.js"
+      ? { url: process.env.SUPABASE_URL, anonKey: process.env.SUPABASE_ANON_KEY }
+      : { vapidPublicKey: process.env.VAPID_PUBLIC_KEY };
+    if (!config.url && pathname === "/supabase-config.js") {
       res.writeHead(503, { "content-type": "text/plain; charset=utf-8" });
       res.end("Supabase configuration is missing.");
       return;
     }
-    const config = JSON.stringify({ url, anonKey }).replace(/</g, "\\u003c");
+    if (!config.anonKey && pathname === "/supabase-config.js") {
+      res.writeHead(503, { "content-type": "text/plain; charset=utf-8" });
+      res.end("Supabase configuration is missing.");
+      return;
+    }
+    if (!config.vapidPublicKey && pathname === "/push-config.js") {
+      res.writeHead(503, { "content-type": "text/plain; charset=utf-8" });
+      res.end("Push notifications are not configured.");
+      return;
+    }
+    const json = JSON.stringify(config).replace(/</g, "\\u003c");
+    const variable = pathname === "/supabase-config.js" ? "SAMY_SUPABASE_CONFIG" : "SAMY_PUSH_CONFIG";
     res.writeHead(200, {
       "content-type": "text/javascript; charset=utf-8",
       "cache-control": "no-store",
       "x-content-type-options": "nosniff",
     });
-    res.end(`window.SAMY_SUPABASE_CONFIG=${config};`);
+    res.end(`window.${variable}=${json};`);
     return;
   }
 
@@ -72,7 +84,9 @@ const server = http.createServer((req, res) => {
   const isAllowedAsset = relativePath.startsWith("assets/")
     && !relativePath.split("/").some((part) => part.startsWith("."))
     && /\.(png|jpe?g|webp|svg)$/i.test(relativePath);
-  if (!isAllowedAsset && !["index.html", "app.js", "sw.js", "manifest.json", "admin-manual-booking.js"].includes(relativePath)) {
+  if (!isAllowedAsset && ![
+    "index.html", "app.js", "sw.js", "manifest.json", "admin-manual-booking.js", "admin-push.js",
+  ].includes(relativePath)) {
     res.writeHead(404);
     res.end("Not found");
     return;
@@ -88,7 +102,7 @@ const server = http.createServer((req, res) => {
       "content-type": mimeTypes[path.extname(filePath).toLowerCase()] || "application/octet-stream",
       "x-content-type-options": "nosniff",
     };
-    if (["index.html", "app.js", "admin-manual-booking.js"].includes(path.basename(filePath))) {
+    if (["index.html", "app.js", "admin-manual-booking.js", "admin-push.js"].includes(path.basename(filePath))) {
       headers["cache-control"] = "no-store";
     }
 
@@ -99,12 +113,10 @@ const server = http.createServer((req, res) => {
           res.end("Could not load application.");
           return;
         }
-        const script = '<script src="/admin-manual-booking.js"></script>';
-        const body = html.includes("/admin-manual-booking.js")
-          ? html
-          : html.includes("</body>")
-            ? html.replace("</body>", `${script}</body>`)
-            : `${html}${script}`;
+        const scripts = '<script src="/admin-manual-booking.js"></script><script src="/admin-push.js"></script>';
+        const body = html.includes("</body>")
+          ? html.replace("</body>", `${scripts}</body>`)
+          : `${html}${scripts}`;
         res.writeHead(200, headers);
         if (req.method === "HEAD") res.end();
         else res.end(body);

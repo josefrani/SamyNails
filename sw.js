@@ -1,6 +1,6 @@
-const CACHE = 'samy-nails-v3';
+const CACHE = 'samy-nails-v4';
 const CACHE_PREFIX = 'samy-nails-';
-const APP_FILES = ['./', './index.html', './app.js', './manifest.json', './assets/logo-app.png', './assets/samy-logo.png'];
+const APP_FILES = ['./', './index.html', './app.js', './admin-manual-booking.js', './admin-push.js', './manifest.json', './assets/logo-app.png', './assets/samy-logo.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -23,9 +23,9 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const request = event.request;
   const url = new URL(request.url);
-  if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.endsWith('/supabase-config.js')) return;
+  if (request.method !== 'GET' || url.origin !== self.location.origin || url.pathname.endsWith('/supabase-config.js') || url.pathname.endsWith('/push-config.js')) return;
 
-  const isAppShell = request.mode === 'navigate' || /\/(index\.html|app\.js|sw\.js|manifest\.json)$/.test(url.pathname);
+  const isAppShell = request.mode === 'navigate' || /\/(index\.html|app\.js|admin-manual-booking\.js|admin-push\.js|sw\.js|manifest\.json)$/.test(url.pathname);
   if (isAppShell) {
     event.respondWith((async () => {
       try {
@@ -70,6 +70,9 @@ self.addEventListener('push', event => {
     tag: payload.tag || payload.id || undefined,
     data: payload.data || { url: '/' },
     renotify: false,
+    // Web Notifications do not expose a custom sound API. false permits the
+    // browser/OS default alert sound when the platform and user settings allow it.
+    silent: false,
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
