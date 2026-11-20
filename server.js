@@ -72,7 +72,7 @@ const server = http.createServer((req, res) => {
   const isAllowedAsset = relativePath.startsWith("assets/")
     && !relativePath.split("/").some((part) => part.startsWith("."))
     && /\.(png|jpe?g|webp|svg)$/i.test(relativePath);
-  if (!isAllowedAsset && !["index.html", "app.js", "sw.js", "manifest.json"].includes(relativePath)) {
+  if (!isAllowedAsset && !["index.html", "app.js", "sw.js", "manifest.json", "admin-manual-booking.js"].includes(relativePath)) {
     res.writeHead(404);
     res.end("Not found");
     return;
@@ -88,9 +88,30 @@ const server = http.createServer((req, res) => {
       "content-type": mimeTypes[path.extname(filePath).toLowerCase()] || "application/octet-stream",
       "x-content-type-options": "nosniff",
     };
-    if (path.basename(filePath) === "index.html" || path.basename(filePath) === "app.js") {
+    if (["index.html", "app.js", "admin-manual-booking.js"].includes(path.basename(filePath))) {
       headers["cache-control"] = "no-store";
     }
+
+    if (path.basename(filePath) === "index.html") {
+      fs.readFile(filePath, "utf8", (readError, html) => {
+        if (readError) {
+          res.writeHead(500);
+          res.end("Could not load application.");
+          return;
+        }
+        const script = '<script src="/admin-manual-booking.js"></script>';
+        const body = html.includes("/admin-manual-booking.js")
+          ? html
+          : html.includes("</body>")
+            ? html.replace("</body>", `${script}</body>`)
+            : `${html}${script}`;
+        res.writeHead(200, headers);
+        if (req.method === "HEAD") res.end();
+        else res.end(body);
+      });
+      return;
+    }
+
     res.writeHead(200, headers);
     if (req.method === "HEAD") {
       res.end();
